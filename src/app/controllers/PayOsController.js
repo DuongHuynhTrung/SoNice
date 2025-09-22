@@ -8,7 +8,7 @@ const { OrderStatusEnum } = require("../../enum/OrderEnum");
 const payOsCallBack = asyncHandler(async (req, res) => {
   try {
     const code = req.body.code;
-    const { amount, orderCode } = req.body.data;
+    const { orderCode } = req.body.data;
     
     const order = await Order.findOne({ order_code: String(orderCode) });
     if (order) {
@@ -25,6 +25,8 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         }
       }
       return res.status(200).send("Thành công");
+    } else {
+      return res.status(404).send("Không tìm thấy order");
     }
   } catch (error) {
     res
