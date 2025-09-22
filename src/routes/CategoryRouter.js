@@ -27,6 +27,22 @@ const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler")
  *   post:
  *     summary: Create a new category (Admin only)
  *     tags: [Categories]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               is_active:
+ *                 type: boolean
+ *             required:
+ *               - name
+ *           example:
+ *             name: "Trang sức"
+ *             is_active: true
  */
 categoryRouter.route("/").get(getAllCategories).post(validateTokenAdmin, createCategory);
 categoryRouter
@@ -40,6 +56,15 @@ categoryRouter
    *   put:
    *     summary: Update category by ID (Admin only)
    *     tags: [Categories]
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *           example:
+ *             name: "Phụ kiện"
+ *             is_active: false
    *   delete:
    *     summary: Delete category by ID (Admin only)
    *     tags: [Categories]
