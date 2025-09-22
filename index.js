@@ -102,7 +102,7 @@ const swaggerDefinition = {
       description: "Development server",
     },
     {
-      url: "https://camcrew-rtao.onrender.com",
+      url: "https://sonice.onrender.com",
       description: "Production server",
     },
   ],
