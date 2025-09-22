@@ -105,7 +105,7 @@ const swaggerDefinition = {
       description: "Development server",
     },
     {
-      url: process.env.API_URL,
+      url: `${process.env.API_URL}`,
       description: "Production server",
     },
   ],

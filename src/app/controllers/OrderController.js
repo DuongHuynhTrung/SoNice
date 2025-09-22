@@ -11,15 +11,25 @@ const payos = new PayOS(
   process.env.PAYOS_CHECKSUMS_KEY
 );
 
-// Lấy tất cả order với phân trang
+// Lấy tất cả order với phân trang (Admin xem tất cả, user chỉ xem của mình)
 const getAllOrders = asyncHandler(async (req, res) => {
   try {
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const total = await Order.countDocuments();
-    const orders = await Order.find()
+    if (!req.user) {
+      res.status(401);
+      throw new Error("Missing Access Token!");
+    }
+
+    const role = req.user.role_name || req.user.roleName;
+    const isAdmin = role === UserRoleEnum.ADMIN;
+
+    const filter = isAdmin ? {} : { user_id: req.user.id };
+
+    const total = await Order.countDocuments(filter);
+    const orders = await Order.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -41,14 +51,26 @@ const getAllOrders = asyncHandler(async (req, res) => {
   }
 });
 
-// Lấy order theo ID
+// Lấy order theo ID (Admin xem bất kỳ, user chỉ xem order của mình)
 const getOrderById = asyncHandler(async (req, res) => {
   try {
+    if (!req.user) {
+      res.status(401);
+      throw new Error("Missing Access Token!");
+    }
     const { order_id } = req.params;
     const order = await Order.findById(order_id).exec();
     if (!order) {
       res.status(404);
       throw new Error("Không tìm thấy order với ID đã cho");
+    }
+    const role = req.user.role_name || req.user.roleName;
+    const isAdmin = role === UserRoleEnum.ADMIN;
+    if (!isAdmin) {
+      if (!order.user_id || order.user_id.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error("Bạn không có quyền xem đơn hàng này");
+      }
     }
     res.status(200).json(order);
   } catch (error) {
