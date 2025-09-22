@@ -11,6 +11,9 @@ const swaggerUi = require("swagger-ui-express");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Behind a proxy (e.g., Render), allow Express to trust X-Forwarded-* headers
+app.set("trust proxy", 1);
+
 // Socket Config
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer, {
@@ -102,7 +105,7 @@ const swaggerDefinition = {
       description: "Development server",
     },
     {
-      url: "https://sonice.onrender.com",
+      url: process.env.API_URL,
       description: "Production server",
     },
   ],
