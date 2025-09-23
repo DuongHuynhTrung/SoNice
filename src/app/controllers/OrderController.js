@@ -1,5 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const Order = require("../models/Order");
+const Voucher = require("../models/Voucher");
+const VoucherUsage = require("../models/VoucherUsage");
+const { VoucherTypeEnum } = require("../../enum/VoucherEnum");
 const User = require("../models/User");
 const { UserRoleEnum } = require("../../enum/UserEnum");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
@@ -80,14 +83,108 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 });
 
+// Helper: validate voucher list and compute discount amount
+async function validateVouchersAndComputeDiscount(voucherIds, orderItemTotal) {
+  if (!voucherIds || voucherIds.length === 0) return { discount: 0, appliedIds: [] };
+  const vouchers = await Voucher.find({ _id: { $in: voucherIds }, is_active: true }).lean();
+  const now = new Date();
+  let discount = 0;
+  const appliedIds = [];
+  let hasPercentage = false;
+  for (const v of vouchers) {
+    if ((v.start_date && now < new Date(v.start_date)) || (v.end_date && now > new Date(v.end_date))) {
+      continue;
+    }
+    if (v.usage_limit !== undefined && v.used_count !== undefined && v.used_count >= v.usage_limit) {
+      continue;
+    }
+    if (!v.can_stack && appliedIds.length > 0) {
+      // If non-stackable and already applied something, skip
+      continue;
+    }
+    if (v.type === VoucherTypeEnum.PERCENTAGE) {
+      // avoid multiple percentage stacking
+      if (hasPercentage) continue;
+      const d = Math.floor((orderItemTotal * Number(v.value)) / 100);
+      discount += d;
+      hasPercentage = true;
+      appliedIds.push(v._id);
+    } else if (v.type === VoucherTypeEnum.FIXED_AMOUNT) {
+      discount += Number(v.value);
+      appliedIds.push(v._id);
+    }
+  }
+  discount = Math.max(0, Math.min(discount, orderItemTotal));
+  return { discount, appliedIds };
+}
+
 // Tạo mới order
 const createOrder = asyncHandler(async (req, res) => {
   try {
-    // Allow anonymous orders: user_id can be null
-    const payload = { ...req.body };
-    if (!payload.order_code) {
-      payload.order_code = `${Date.now()}`;
+    // Parse and validate input
+    const {
+      user_id = null,
+      order_item_list = [],
+      payment_method,
+      shipping_address,
+      customer_name,
+      customer_phone,
+      customer_email,
+      notes,
+      order_code,
+      voucher_usage_id,
+      voucher_list = [],
+    } = req.body || {};
+
+    if (!Array.isArray(order_item_list) || order_item_list.length === 0) {
+      res.status(400);
+      throw new Error("order_item_list bắt buộc và phải có ít nhất 1 mục");
     }
+    if (!payment_method) {
+      res.status(400);
+      throw new Error("payment_method là bắt buộc");
+    }
+    if (!shipping_address || !customer_name || !customer_phone) {
+      res.status(400);
+      throw new Error("Thiếu shipping_address, customer_name hoặc customer_phone");
+    }
+
+    // Compute order items total (before discount)
+    const OrderItem = require("../models/OrderItem");
+    const items = await OrderItem.find({ _id: { $in: order_item_list } })
+      .select("total_price")
+      .lean();
+    const orderItemTotal = items.reduce((s, it) => s + (Number(it.total_price) || 0), 0);
+
+    // Prepare voucher usage if provided
+    let ensuredVoucherUsageId = voucher_usage_id || null;
+    if (voucher_list && voucher_list.length > 0 && !ensuredVoucherUsageId) {
+      const { discount, appliedIds } = await validateVouchersAndComputeDiscount(voucher_list, orderItemTotal);
+      const usageDoc = await new VoucherUsage({ voucher_list: appliedIds, discount_amount: discount }).save();
+      ensuredVoucherUsageId = usageDoc._id;
+    }
+    if (ensuredVoucherUsageId) {
+      const usage = await VoucherUsage.findById(ensuredVoucherUsageId).lean();
+      if (!usage) {
+        res.status(400);
+        throw new Error("voucher_usage_id không hợp lệ");
+      }
+    }
+
+    // Create order
+    const payload = {
+      user_id,
+      order_item_list,
+      order_code: order_code || `${Date.now()}`,
+      payment_method,
+      shipping_address,
+      customer_name,
+      customer_phone,
+      customer_email,
+      notes,
+      voucher_usage_id: ensuredVoucherUsageId,
+    };
+
     const order = new Order(payload);
     const created = await order.save();
 
@@ -105,7 +202,10 @@ const createOrder = asyncHandler(async (req, res) => {
     };
     const paymentLinkData = await payos.createPaymentLink(requestData);
 
-    res.status(201).json({ order: created, checkoutUrl: paymentLinkData.checkoutUrl });
+    res.status(201).json({
+      order: created,
+      checkoutUrl: paymentLinkData.checkoutUrl
+    });
   } catch (error) {
     res
       .status(res.statusCode || 500)
@@ -140,6 +240,16 @@ const updateOrderById = asyncHandler(async (req, res) => {
               case "confirmed":
                 type = NotificationTypeEnum.ORDER_CONFIRMED;
                 content = `Đơn hàng mã ${updated.order_code} đã được Sò Nice xác nhận.`;
+                // Increase voucher used_count if any
+                if (updated.voucher_usage_id) {
+                  const usage = await VoucherUsage.findById(updated.voucher_usage_id).lean();
+                  if (usage && Array.isArray(usage.voucher_list) && usage.voucher_list.length > 0) {
+                    await Voucher.updateMany(
+                      { _id: { $in: usage.voucher_list } },
+                      { $inc: { used_count: 1 } }
+                    );
+                  }
+                }
                 break;
               case "processing":
                 type = NotificationTypeEnum.ORDER_PROCESSING;

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { OrderStatusEnum, OrderPaymentMethodEnum } = require("../../enum/OrderEnum");
 const OrderItem = require("./OrderItem");
+const VoucherUsage = require("./VoucherUsage");
 
 const orderSchema = mongoose.Schema(
   {
@@ -68,20 +69,32 @@ const orderSchema = mongoose.Schema(
   }
 );
 
-// Helper: calculate total amount from order_item_list
-async function calculateTotalAmountFromItems(orderItemIds) {
-  if (!orderItemIds || !Array.isArray(orderItemIds) || orderItemIds.length === 0) {
-    return 0;
+// Helper: calculate gross total and apply voucher discount if present
+async function calculateNetTotal(orderItemIds, voucherUsageId) {
+  let grossTotal = 0;
+  if (orderItemIds && Array.isArray(orderItemIds) && orderItemIds.length > 0) {
+    const items = await OrderItem.find({ _id: { $in: orderItemIds } }).select("total_price").lean();
+    grossTotal = items.reduce((sum, item) => sum + (Number(item.total_price) || 0), 0);
   }
-  const items = await OrderItem.find({ _id: { $in: orderItemIds } }).select("total_price").lean();
-  return items.reduce((sum, item) => sum + (Number(item.total_price) || 0), 0);
+
+  let discount = 0;
+  if (voucherUsageId) {
+    const usage = await VoucherUsage.findById(voucherUsageId).select("discount_amount").lean();
+    if (usage && typeof usage.discount_amount === "number") {
+      discount = Math.max(0, usage.discount_amount);
+    }
+  }
+
+  const net = Math.max(0, grossTotal - discount);
+  return net;
 }
 
 // Pre-save: set total_amount based on order_item_list
 orderSchema.pre("save", async function (next) {
   try {
     const orderItemIds = this.order_item_list || [];
-    this.total_amount = await calculateTotalAmountFromItems(orderItemIds);
+    const voucherUsageId = this.voucher_usage_id || null;
+    this.total_amount = await calculateNetTotal(orderItemIds, voucherUsageId);
     next();
   } catch (err) {
     next(err);
@@ -95,14 +108,17 @@ orderSchema.pre("findOneAndUpdate", async function (next) {
     // In case $set is used
     const $set = update.$set || {};
     const providedIds = update.order_item_list || $set.order_item_list;
+    const providedVoucherUsageId = update.voucher_usage_id || $set.voucher_usage_id;
 
     let orderItemIds = providedIds;
-    if (!orderItemIds) {
-      const doc = await this.model.findOne(this.getQuery()).select("order_item_list").lean();
-      orderItemIds = doc ? doc.order_item_list : [];
+    let voucherUsageId = providedVoucherUsageId;
+    if (!orderItemIds || !voucherUsageId) {
+      const doc = await this.model.findOne(this.getQuery()).select("order_item_list voucher_usage_id").lean();
+      if (!orderItemIds) orderItemIds = doc ? doc.order_item_list : [];
+      if (!voucherUsageId) voucherUsageId = doc ? doc.voucher_usage_id : null;
     }
 
-    const total = await calculateTotalAmountFromItems(orderItemIds);
+    const total = await calculateNetTotal(orderItemIds, voucherUsageId);
 
     if (update.$set) {
       update.$set.total_amount = total;
@@ -116,6 +132,6 @@ orderSchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+ module.exports = mongoose.model("Order", orderSchema);
 
 
