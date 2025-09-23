@@ -105,8 +105,6 @@ const createOrder = asyncHandler(async (req, res) => {
     };
     const paymentLinkData = await payos.createPaymentLink(requestData);
 
-    await payos.confirmWebhook(`${process.env.API_URL}/api/payOs/callback`);
-
     res.status(201).json({ order: created, checkoutUrl: paymentLinkData.checkoutUrl });
   } catch (error) {
     res
