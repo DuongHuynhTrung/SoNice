@@ -100,8 +100,8 @@ const createOrder = asyncHandler(async (req, res) => {
       orderCode: Number(created.order_code) || Date.now(),
       amount: created.total_amount,
       description,
-      cancelUrl: `${process.env.CLIENT_URL}/order-history`,
-      returnUrl: `${process.env.CLIENT_URL}/order-history`,
+      cancelUrl: `${process.env.CLIENT_URL}/orders`,
+      returnUrl: `${process.env.CLIENT_URL}/orders`,
     };
     const paymentLinkData = await payos.createPaymentLink(requestData);
 
