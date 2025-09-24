@@ -8,7 +8,7 @@ const {
   updateOrderById,
   deleteOrderById,
 } = require("../app/controllers/OrderController");
-const { validateToken } = require("../app/middleware/validateTokenHandler");
+const { validateToken, validateTokenAdmin } = require("../app/middleware/validateTokenHandler");
 
 /**
  * @swagger
@@ -120,7 +120,12 @@ orderRouter.use(validateToken);
  *       200:
  *         description: List of orders
  */
-orderRouter.route("/").get(getAllOrders)
+/**
+ * @swagger
+ * security:
+ *   - bearerAuth: []
+ */
+orderRouter.route("/").get(validateTokenAdmin, getAllOrders)
 orderRouter
   .route("/:order_id")
   /**
@@ -155,8 +160,8 @@ orderRouter
    *         required: true
    */
   .get(getOrderById)
-  .put(updateOrderById)
-  .delete(deleteOrderById);
+  .put(validateTokenAdmin, updateOrderById)
+  .delete(validateTokenAdmin, deleteOrderById);
 
 module.exports = orderRouter;
 

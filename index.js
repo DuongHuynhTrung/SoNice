@@ -30,25 +30,23 @@ io.on("connection", (socket) => {
 });
 global._io = io;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+    ],
+  })
+);
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
-// Thiết lập tiêu đề cho Access-Control
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  next();
-});
+// Rely on cors() above; no manual headers needed
 
 // Connect to DB
 const db = require("./src/config/dbConnection");

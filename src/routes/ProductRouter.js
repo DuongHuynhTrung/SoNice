@@ -1,5 +1,6 @@
 const express = require("express");
 const productRouter = express.Router();
+const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler");
 
 const {
   getAllProducts,
@@ -81,7 +82,12 @@ const {
  *       201:
  *         description: Product created successfully
  */
-productRouter.route("/").get(getAllProducts).post(createProduct);
+/**
+ * @swagger
+ * security:
+ *   - bearerAuth: []
+ */
+productRouter.route("/").get(getAllProducts).post(validateTokenAdmin, createProduct);
 productRouter
   .route("/:product_id")
   /**
@@ -126,8 +132,8 @@ productRouter
    *         required: true
    */
   .get(getProductById)
-  .put(updateProductById)
-  .delete(deleteProductById);
+  .put(validateTokenAdmin, updateProductById)
+  .delete(validateTokenAdmin, deleteProductById);
 
 module.exports = productRouter;
 

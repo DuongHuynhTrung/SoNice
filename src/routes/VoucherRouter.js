@@ -1,5 +1,6 @@
 const express = require("express");
 const voucherRouter = express.Router();
+const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler");
 
 const {
   getAllVouchers,
@@ -72,7 +73,12 @@ const {
  *             end_date: "2025-02-01T00:00:00.000Z"
  *             is_active: true
  */
-voucherRouter.route("/").get(getAllVouchers).post(createVoucher);
+/**
+ * @swagger
+ * security:
+ *   - bearerAuth: []
+ */
+voucherRouter.route("/").get(getAllVouchers).post(validateTokenAdmin, createVoucher);
 voucherRouter
   .route("/:voucher_id")
   /**
@@ -98,8 +104,8 @@ voucherRouter
    *     tags: [Vouchers]
    */
   .get(getVoucherById)
-  .put(updateVoucherById)
-  .delete(deleteVoucherById);
+  .put(validateTokenAdmin, updateVoucherById)
+  .delete(validateTokenAdmin, deleteVoucherById);
 
 module.exports = voucherRouter;
 
