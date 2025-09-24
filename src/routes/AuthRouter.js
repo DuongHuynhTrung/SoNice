@@ -106,6 +106,12 @@ const loginLimiter = require("../app/middleware/loginLimiter");
  *               role:
  *                 type: string
  *                 description: User role (defaults to customer)
+ *           example:
+ *             email: "linh.nguyen@example.com"
+ *             password: "StrongPassw0rd!"
+ *             full_name: "Nguyễn Thị Linh"
+ *             phone_number: "0912345678"
+ *             role: "CUSTOMER"
  *     responses:
  *       200:
  *         description: User registered successfully
@@ -143,6 +149,9 @@ authRouter.route("/register").post(registerUser);
  *                 description: Email or phone number
  *               password:
  *                 type: string
+ *           example:
+ *             identifier: "linh.nguyen@example.com"
+ *             password: "StrongPassw0rd!"
  *     responses:
  *       200:
  *         description: Successful login
@@ -195,6 +204,8 @@ authRouter.route("/login").post(loginLimiter, login);
  *               token:
  *                 type: string
  *                 description: Google OAuth token
+ *           example:
+ *             token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
  *       200:
  *         description: Successful login
@@ -274,6 +285,8 @@ authRouter.route("/logout").post(logout);
  *               token:
  *                 type: string
  *                 description: Email verification token
+ *           example:
+ *             token: "c2lnbmVkLXRva2VuLWZyb20tZW1haWwtbGluay"
  *     responses:
  *       200:
  *         description: Email verified successfully

@@ -128,6 +128,10 @@ const {
  *               cover_url:
  *                 type: string
  *                 description: Blog cover image URL
+ *           example:
+ *             title: "Gợi ý quà tặng sinh nhật ý nghĩa"
+ *             content: "Danh sách các món quà handmade phù hợp cho dịp sinh nhật..."
+ *             cover_url: "https://cdn.example.com/blogs/birthday-ideas.jpg"
  *     responses:
  *       201:
  *         description: Blog created successfully
@@ -201,6 +205,10 @@ blogRouter.route("/").get(getAllBlogs).post(validateTokenAdmin, createBlog);
  *                 type: string
  *               cover_url:
  *                 type: string
+ *           example:
+ *             title: "Gợi ý quà tặng sinh nhật (cập nhật)"
+ *             content: "Bổ sung thêm 5 ý tưởng quà tặng mới..."
+ *             cover_url: "https://cdn.example.com/blogs/birthday-ideas-v2.jpg"
  *     responses:
  *       200:
  *         description: Blog updated successfully

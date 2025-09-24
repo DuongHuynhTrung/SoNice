@@ -214,6 +214,9 @@ userRouter.post("/forgotPassword/:email", forgotPassword);
  *               newPassword:
  *                 type: string
  *                 description: New password
+ *           example:
+ *             email: "linh.nguyen@example.com"
+ *             newPassword: "NewStrongerPassw0rd!"
  *     responses:
  *       200:
  *         description: Password reset successfully
@@ -277,6 +280,15 @@ userRouter.use(validateToken);
  *               rank:
  *                 type: string
  *                 description: "User's ranlk (e.g., Normal, Premium)"
+ *           example:
+ *             full_name: "Nguyễn Văn A"
+ *             dob: "1995-05-20"
+ *             email: "nguyenvana@example.com"
+ *             phone_number: "0909876543"
+ *             country: "VN"
+ *             gender: "male"
+ *             avatar_url: "https://cdn.example.com/avatars/a.png"
+ *             rank: "NORMAL"
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -486,6 +498,8 @@ userRouter.route("/:id").get(getUserById).delete(deleteUsers);
  *             properties:
  *               password:
  *                 type: string
+ *           example:
+ *             password: "CurrentPassw0rd!"
  *     responses:
  *       200:
  *         description: Old password is correct
@@ -525,6 +539,9 @@ userRouter.route("/checkOldPassword/:id").post(checkOldPassword);
  *                 type: string
  *               confirmPassword:
  *                 type: string
+ *           example:
+ *             password: "NewPassw0rd!"
+ *             confirmPassword: "NewPassw0rd!"
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -624,6 +641,10 @@ userRouter
  *               amount:
  *                 type: number
  *                 description: Amount to pay for membership upgrade
+ *           example:
+ *             user_id: "66310aa72f9b3a0012ab4abc"
+ *             membership: "one_month"
+ *             amount: 99000
  *     responses:
  *       200:
  *         description: Membership upgraded successfully
@@ -767,6 +788,9 @@ userRouter.post("/upMembershipByAccountBalance", upMembershipByAccountBalance);
  *               otp:
  *                 type: string
  *                 description: OTP code
+ *           example:
+ *             email: "linh.nguyen@example.com"
+ *             otp: "123456"
  *     responses:
  *       200:
  *         description: OTP verified successfully

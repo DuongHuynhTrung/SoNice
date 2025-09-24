@@ -151,6 +151,10 @@ const {
  *               content:
  *                 type: string
  *                 description: Notification content
+ *           example:
+ *             user_id: "66310aa72f9b3a0012ab4abc"
+ *             type: "ORDER_STATUS"
+ *             content: "Đơn hàng #SONICE-2409271234 đã được xác nhận."
  *     responses:
  *       201:
  *         description: Notification created successfully
@@ -229,6 +233,8 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *               isRead:
  *                 type: boolean
  *                 description: Mark as read/unread
+ *           example:
+ *             isRead: true
  *     responses:
  *       200:
  *         description: Notification updated successfully
