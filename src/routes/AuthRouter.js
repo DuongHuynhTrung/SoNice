@@ -35,20 +35,9 @@ const loginLimiter = require("../app/middleware/loginLimiter");
  *           type: string
  *         role_name:
  *           type: string
- *           enum: [ADMIN, CUSTOMER, CAMERAMAN]
+ *           enum: [customer, admin]
  *         is_verified:
  *           type: boolean
- *         status:
- *           type: string
- *           enum: [ACTIVE, BLOCKED]
- *         membership:
- *           type: string
- *           enum: [NORMAL, ONE_MONTH, SIX_MONTH]
- *         membership_expires_at:
- *           type: string
- *           format: date-time
- *         account_balance:
- *           type: number
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -111,7 +100,7 @@ const loginLimiter = require("../app/middleware/loginLimiter");
  *             password: "StrongPassw0rd!"
  *             full_name: "Nguyễn Thị Linh"
  *             phone_number: "0912345678"
- *             role: "CUSTOMER"
+ *             role: "customer"
  *     responses:
  *       200:
  *         description: User registered successfully

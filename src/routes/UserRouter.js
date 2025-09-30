@@ -288,7 +288,7 @@ userRouter.use(validateToken);
  *             avatar_url: "https://cdn.example.com/avatars/a.png"
  *             address: "123 Đường ABC, Quận 1, TP.HCM"
  *             is_verified: false
- *             role_name: "CUSTOMER"
+ *             role_name: "customer"
  *     responses:
  *       200:
  *         description: User updated successfully

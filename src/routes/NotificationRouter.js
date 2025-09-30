@@ -155,7 +155,7 @@ const {
  *                 description: Notification content
  *           example:
  *             user_id: "66310aa72f9b3a0012ab4abc"
- *             type: "ORDER_STATUS"
+ *             type: "order_confirmed"
  *             content: "Đơn hàng #SONICE-2409271234 đã được xác nhận."
  *     responses:
  *       201:
