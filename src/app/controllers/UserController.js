@@ -8,6 +8,7 @@ const { UserRoleEnum } = require("../../enum/UserEnum");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
 const fs = require("fs");
 const path = require("path");
+const Notification = require("../models/Notification");
 
 //@desc Get all users (CUSTOMER) with pagination
 //@route GET /api/users
