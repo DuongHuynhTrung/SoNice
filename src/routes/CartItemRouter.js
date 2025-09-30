@@ -11,9 +11,45 @@ const {
 
 /**
  * @swagger
- * tags:
- *   name: CartItems
- *   description: Cart item management API
+ * components:
+ *   schemas:
+ *     CartItem:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         user_id:
+ *           type: string
+ *         product_list:
+ *           type: array
+ *           items:
+ *             type: string
+ *         quantity:
+ *           type: number
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CartItemResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CartItem'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
  */
 
 /**
@@ -22,6 +58,13 @@ const {
  *   get:
  *     summary: Get all cart items with pagination
  *     tags: [CartItems]
+ *     responses:
+ *       200:
+ *         description: List of cart items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CartItemResponse'
  *   post:
  *     summary: Create a new cart item
  *     tags: [CartItems]
@@ -51,6 +94,13 @@ const {
  *               "663103112f9b3a0012ab44df"
  *             ]
  *             quantity: 2
+ *     responses:
+ *       201:
+ *         description: Cart item created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CartItem'
  */
 cartItemRouter.route("/").get(getAllCartItems).post(createCartItem);
 cartItemRouter

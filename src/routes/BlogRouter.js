@@ -39,6 +39,9 @@ const {
  *         cover_url:
  *           type: string
  *           description: Blog cover image URL
+ *         is_published:
+ *           type: boolean
+ *           description: Publication status
  *         createdAt:
  *           type: string
  *           format: date-time

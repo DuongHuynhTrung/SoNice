@@ -12,6 +12,65 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Voucher:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         code:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         type:
+ *           type: string
+ *           enum: [percentage, fixed_amount]
+ *         value:
+ *           type: number
+ *         usage_limit:
+ *           type: number
+ *         used_count:
+ *           type: number
+ *         can_stack:
+ *           type: boolean
+ *         start_date:
+ *           type: string
+ *           format: date-time
+ *         end_date:
+ *           type: string
+ *           format: date-time
+ *         is_active:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     VoucherResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Voucher'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ */
+/**
+ * @swagger
  * tags:
  *   name: Vouchers
  *   description: Voucher management API
@@ -23,6 +82,13 @@ const {
  *   get:
  *     summary: Get all vouchers with pagination
  *     tags: [Vouchers]
+ *     responses:
+ *       200:
+ *         description: List of vouchers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VoucherResponse'
  *   post:
  *     summary: Create a new voucher (Admin only)
  *     tags: [Vouchers]
@@ -72,6 +138,13 @@ const {
  *             start_date: "2025-01-01T00:00:00.000Z"
  *             end_date: "2025-02-01T00:00:00.000Z"
  *             is_active: true
+ *     responses:
+ *       201:
+ *         description: Voucher created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Voucher'
  */
 /**
  * @swagger

@@ -12,6 +12,69 @@ const { validateToken, validateTokenAdmin } = require("../app/middleware/validat
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Order:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         user_id:
+ *           type: string
+ *           nullable: true
+ *         order_item_list:
+ *           type: array
+ *           items:
+ *             type: string
+ *         order_code:
+ *           type: string
+ *         total_amount:
+ *           type: number
+ *         status:
+ *           type: string
+ *           enum: [pending, confirmed, processing, shipping, delivered, cancelled, payment_failed]
+ *         payment_method:
+ *           type: string
+ *           enum: [bank, cod]
+ *         shipping_address:
+ *           type: string
+ *         customer_name:
+ *           type: string
+ *         customer_phone:
+ *           type: string
+ *         customer_email:
+ *           type: string
+ *         notes:
+ *           type: string
+ *         voucher_usage_id:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     OrderResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Order'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ */
+/**
+ * @swagger
  * tags:
  *   name: Orders
  *   description: Order management API
@@ -37,6 +100,10 @@ const { validateToken, validateTokenAdmin } = require("../app/middleware/validat
  *     responses:
  *       200:
  *         description: List of orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OrderResponse'
  *   post:
  *     summary: Create a new order and return checkoutUrl
  *     tags: [Orders]
@@ -93,6 +160,15 @@ const { validateToken, validateTokenAdmin } = require("../app/middleware/validat
  *     responses:
  *       201:
  *         description: Order created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *                 checkoutUrl:
+ *                   type: string
  */
 // Orders allow anonymous creation; protect updates/deletes with admin if desired later
 orderRouter.route("/").post(createOrder);
@@ -125,7 +201,7 @@ orderRouter.use(validateToken);
  * security:
  *   - bearerAuth: []
  */
-orderRouter.route("/").get(validateTokenAdmin, getAllOrders)
+orderRouter.route("/").get(getAllOrders)
 orderRouter
   .route("/:order_id")
   /**
@@ -140,6 +216,13 @@ orderRouter
    *         schema:
    *           type: string
    *         required: true
+  *     responses:
+  *       200:
+  *         description: Order details
+  *         content:
+  *           application/json:
+  *             schema:
+  *               $ref: '#/components/schemas/Order'
    *   put:
    *     summary: Update order by ID
    *     tags: [Orders]

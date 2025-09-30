@@ -11,9 +11,43 @@ const {
 
 /**
  * @swagger
- * tags:
- *   name: OrderItems
- *   description: Order item management API
+ * components:
+ *   schemas:
+ *     OrderItem:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         product_id:
+ *           type: string
+ *         quantity:
+ *           type: number
+ *         total_price:
+ *           type: number
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     OrderItemResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
  */
 
 /**
@@ -22,6 +56,13 @@ const {
  *   get:
  *     summary: Get all order items with pagination
  *     tags: [OrderItems]
+ *     responses:
+ *       200:
+ *         description: List of order items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OrderItemResponse'
  *   post:
  *     summary: Create a new order item
  *     tags: [OrderItems]
@@ -46,6 +87,13 @@ const {
  *             product_id: "6630f2f52f9b3a0012ab44cc"
  *             quantity: 2
  *             total_price: 398000
+ *     responses:
+ *       201:
+ *         description: Order item created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OrderItem'
  */
 orderItemRouter.route("/").get(getAllOrderItems).post(createOrderItem);
 orderItemRouter

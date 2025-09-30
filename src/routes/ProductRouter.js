@@ -12,6 +12,56 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         category_id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         amount:
+ *           type: number
+ *         description:
+ *           type: string
+ *         stock_quantity:
+ *           type: number
+ *         img_url_list:
+ *           type: array
+ *           items:
+ *             type: string
+ *         is_active:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     ProductResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Product'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ */
+/**
+ * @swagger
  * tags:
  *   name: Products
  *   description: Product management API
@@ -37,6 +87,10 @@ const {
  *     responses:
  *       200:
  *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductResponse'
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
@@ -81,6 +135,10 @@ const {
  *     responses:
  *       201:
  *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
  */
 /**
  * @swagger
@@ -102,7 +160,14 @@ productRouter
    *         schema:
    *           type: string
    *         required: true
-   *   put:
+ *     responses:
+ *       200:
+ *         description: Product details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *   put:
    *     summary: Update product by ID
    *     tags: [Products]
    *     parameters:
@@ -121,6 +186,13 @@ productRouter
   *             name: "Vòng tay handmade bản mới"
   *             amount: 219000
   *             stock_quantity: 40
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
    *   delete:
    *     summary: Delete product by ID
    *     tags: [Products]
@@ -130,6 +202,16 @@ productRouter
    *         schema:
    *           type: string
    *         required: true
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
    */
   .get(getProductById)
   .put(validateTokenAdmin, updateProductById)

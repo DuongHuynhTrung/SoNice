@@ -13,6 +13,44 @@ const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler")
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Category:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         is_active:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CategoryResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Category'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ */
+/**
+ * @swagger
  * tags:
  *   name: Categories
  *   description: Category management API
@@ -24,6 +62,13 @@ const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler")
  *   get:
  *     summary: Get all categories with pagination
  *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: List of categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CategoryResponse'
  *   post:
  *     summary: Create a new category (Admin only)
  *     tags: [Categories]

@@ -62,9 +62,6 @@ const {
  *           type: string
  *           maxLength: 10
  *           description: "User's phone number"
- *         country:
- *           type: string
- *           description: "User's country of residence"
  *         gender:
  *           type: string
  *           description: "User's gender"
@@ -74,32 +71,23 @@ const {
  *         avatar_url:
  *           type: string
  *           description: "URL of the user's avatar image"
- *         rank:
- *           type: string
- *           default: "NORMAL"
- *           description: "User's rank (e.g., NORMAL, ADMIN)"
  *         role_name:
  *           type: string
- *           enum: [ADMIN, CUSTOMER, CAMERAMAN]
+ *           enum: [customer, admin]
  *           description: "User's role in the application"
- *         status:
+ *         address:
  *           type: string
- *           enum: [ACTIVE, BLOCKED]
- *           description: "User account status"
- *         membership:
- *           type: string
- *           enum: [NORMAL, ONE_MONTH, SIX_MONTH]
- *           description: "User's membership level"
- *         membership_expires_at:
- *           type: string
- *           format: date-time
- *           description: "Membership expiration date"
- *         account_balance:
- *           type: number
- *           description: "User's account balance"
+ *           description: "User's address"
  *         is_verified:
  *           type: boolean
  *           description: "Email verification status"
+ *         otp:
+ *           type: number
+ *           description: "One-time password for verification"
+ *         otpExpired:
+ *           type: string
+ *           format: date-time
+ *           description: "OTP expiration time"
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -169,18 +157,25 @@ userRouter.route("/delete-no-auth/:id").delete(deleteUsersNoAuth);
 
 /**
  * @swagger
- * /api/users/forgotPassword/{email}:
+ * /api/users/forgotPassword:
  *   post:
  *     summary: Send password reset email
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: email
- *         schema:
- *           type: string
- *           format: email
- *         required: true
- *         description: User's email address
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *           example:
+ *             email: "linh.nguyen@example.com"
  *     responses:
  *       200:
  *         description: Password reset email sent successfully
@@ -189,7 +184,7 @@ userRouter.route("/delete-no-auth/:id").delete(deleteUsersNoAuth);
  *       500:
  *         description: Internal Server Error
  */
-userRouter.post("/forgotPassword/:email", forgotPassword);
+userRouter.post("/forgotPassword", forgotPassword);
 
 /**
  * @swagger
@@ -265,9 +260,6 @@ userRouter.use(validateToken);
  *               phone_number:
  *                 type: string
  *                 description: "User's phone number"
- *               country:
- *                 type: string
- *                 description: "User's country of residence"
  *               gender:
  *                 type: string
  *                 description: "User's gender"
@@ -277,18 +269,26 @@ userRouter.use(validateToken);
  *               avatar_url:
  *                 type: string
  *                 description: "URL of the user's avatar image"
- *               rank:
+ *               address:
  *                 type: string
- *                 description: "User's ranlk (e.g., Normal, Premium)"
+ *                 description: "User's address"
+ *               is_verified:
+ *                 type: boolean
+ *                 description: "Email verification status"
+ *               role_name:
+ *                 type: string
+ *                 enum: [customer, admin]
+ *                 description: "User's role"
  *           example:
  *             full_name: "Nguyễn Văn A"
  *             dob: "1995-05-20"
  *             email: "nguyenvana@example.com"
  *             phone_number: "0909876543"
- *             country: "VN"
  *             gender: "male"
  *             avatar_url: "https://cdn.example.com/avatars/a.png"
- *             rank: "NORMAL"
+ *             address: "123 Đường ABC, Quận 1, TP.HCM"
+ *             is_verified: false
+ *             role_name: "CUSTOMER"
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -340,15 +340,18 @@ userRouter.route("/admin/:id").put(validateTokenAdmin, updateUserInfoForAdmin);
  *                 type: string
  *                 format: date
  *                 description: "User's date of birth"
- *               country:
- *                 type: string
- *                 description: "User's country of residence"
  *               gender:
  *                 type: string
  *                 description: "User's gender"
  *               avatar_url:
  *                 type: string
  *                 description: "URL of the user's avatar image"
+ *               phone_number:
+ *                 type: string
+ *                 description: "User's phone number"
+ *               address:
+ *                 type: string
+ *                 description: "User's address"
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -786,11 +789,11 @@ userRouter.post("/upMembershipByAccountBalance", upMembershipByAccountBalance);
  *                 format: email
  *                 description: User's email address
  *               otp:
- *                 type: string
+ *                 type: number
  *                 description: OTP code
  *           example:
  *             email: "linh.nguyen@example.com"
- *             otp: "123456"
+ *             otp: 123456
  *     responses:
  *       200:
  *         description: OTP verified successfully
