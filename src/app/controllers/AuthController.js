@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { UserRoleEnum } = require("../../enum/UserEnum");
+const { UserRoleEnum, UserStatusEnum } = require("../../enum/UserEnum");
 const { jwtDecode } = require("jwt-decode");
 
 //@desc Register New user
@@ -107,7 +107,8 @@ const loginGoogle = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: googlePayload.email });
     if (user) {
       if (user.status === UserStatusEnum.BLOCKED) {
-        throw new BadRequestException(
+        res.status(401);
+        throw new Error(
           "Tài khoản của bạn đã bị khóa. Hãy liên hệ với admin để mở khóa!"
         );
       }
@@ -192,7 +193,7 @@ const login = asyncHandler(async (req, res, next) => {
     const matches = await bcrypt.compare(password, user.password);
     if (user && matches) {
       // Kiểm tra trạng thái tài khoản bị block
-      if (user.status === "blocked" || user.status === false) {
+      if (user.status === UserStatusEnum.BLOCKED) {
         res.status(401);
         throw new Error(
           "Tài khoản của bạn đã bị khóa! Vui lòng liên hệ với quản trị viên!"

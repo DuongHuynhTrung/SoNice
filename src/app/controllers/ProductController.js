@@ -10,6 +10,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
     const total = await Product.countDocuments();
     const products = await Product.find()
+      .populate("category_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -35,7 +36,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
   try {
     const { product_id } = req.params;
-    const product = await Product.findById(product_id).exec();
+    const product = await Product.findById(product_id).populate("category_id").exec();
     if (!product) {
       res.status(404);
       throw new Error("Không tìm thấy product với ID đã cho");
