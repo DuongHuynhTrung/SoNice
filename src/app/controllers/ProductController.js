@@ -1,15 +1,42 @@
 const asyncHandler = require("express-async-handler");
 const Product = require("../models/Product");
 
-// Lấy tất cả product với phân trang
+// Lấy tất cả product với phân trang, filter theo category, search theo tên, filter theo range giá min-max
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const total = await Product.countDocuments();
-    const products = await Product.find()
+    // Lấy các tham số filter
+    const { category_id, search, min_price, max_price } = req.query;
+
+    // Xây dựng query filter
+    let filter = {};
+
+    // Filter theo category
+    if (category_id) {
+      filter.category_id = category_id;
+    }
+
+    // Search theo tên (không phân biệt hoa thường)
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
+
+    // Filter theo range giá
+    if (min_price !== undefined || max_price !== undefined) {
+      filter.price = {};
+      if (min_price !== undefined) {
+        filter.price.$gte = parseFloat(min_price);
+      }
+      if (max_price !== undefined) {
+        filter.price.$lte = parseFloat(max_price);
+      }
+    }
+
+    const total = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
       .populate("category_id")
       .sort({ createdAt: -1 })
       .skip(skip)
